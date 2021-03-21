@@ -1,0 +1,40 @@
+- hosts: all
+  become: true
+
+  tasks:
+      - name: install pip3
+        apt: name=python3-pip state=present
+
+      - name: Install Docker prerequisites
+        apt: name={{ item }} state=latest update_cache=yes
+        loop: ["apt-transport-https", "ca-certificates", "curl", "software-properties-common"]
+
+      - name: Add Docker GPG apt Key
+        apt_key:
+            url: https://download.docker.com/linux/ubuntu/gpg
+            state: present
+
+      - name: Add Docker Repository
+        apt_repository:
+            repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable
+            state: present
+
+      - name: Update apt and install docker-ce
+        apt: update_cache=yes name=docker-ce state=latest
+
+      - name: adding user "{{ ansible_ssh_user }}" to docker group
+        user:
+            name: "{{ ansible_ssh_user }}"
+            groups: docker
+            append: yes
+        become: yes
+
+      - name: Install Docker Python Module container management
+        pip:
+            name: docker
+
+      - name: Create hello world containers
+        docker_container:
+            name: "hello-world"
+            image: "hello-world"
+            state: present

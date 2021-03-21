@@ -1,0 +1,5 @@
+[servers]
+local-server ansible_host=local-server
+
+[all:vars]
+ansible_python_interpreter=/usr/bin/python3
